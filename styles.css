@@ -96,7 +96,7 @@ h1 { font-size: 1.4rem; font-weight: 800; }
 .card-img-container { width: 100%; height: 140px; background: #eee; position: relative; }
 .card-img { width: 100%; height: 100%; object-fit: cover; }
 
-/* CONTENEDOR DE BOTONES DE ACCIÓN */
+/* [1] CONTENEDOR DE BOTONES DE ACCIÓN (SOLO ELIMINAR ARRIBA) */
 .card-actions-top {
     position: absolute; 
     top: 8px; 
@@ -106,7 +106,7 @@ h1 { font-size: 1.4rem; font-weight: 800; }
     z-index: 5;
 }
 
-.action-btn {
+.action-btn { /* Esto sigue siendo para el botón circular (DELETE) */
     width: 30px; 
     height: 30px; 
     border-radius: 50%; 
@@ -124,10 +124,6 @@ h1 { font-size: 1.4rem; font-weight: 800; }
     color: #EF4444; /* Rojo para eliminar */
 }
 
-.edit-btn {
-    color: #4F46E5; /* Índigo para editar */
-}
-
 /* Señalador de Carrito/Deuda (Indicador de Cantidad) */
 .cart-indicator {
     position: absolute; top: 0; left: 0; background: var(--primary-dark);
@@ -135,15 +131,51 @@ h1 { font-size: 1.4rem; font-weight: 800; }
     font-weight: 700; font-size: 0.85rem; z-index: 5;
 }
 
-.card-content { padding: 12px; flex: 1; display: flex; flex-direction: column; }
+/* [1] Ajuste del contenido para los botones al final */
+.card-content { 
+    padding: 12px; 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+}
 .card-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; color: var(--text); line-height: 1.2; }
 .card-code { font-size: 0.75rem; color: #6B7280; background: #F3F4F6; padding: 2px 6px; border-radius: 4px; align-self: flex-start; margin-bottom: 8px; }
-.price-box { margin-top: auto; margin-bottom: 8px; }
+.price-box { 
+    margin-top: 0; /* Sin auto margin */
+    margin-bottom: 8px; 
+}
 .price-usd { font-size: 1.2rem; font-weight: 800; color: var(--text); }
 .price-bs { font-size: 0.95rem; font-weight: 600; color: var(--primary); }
+
+/* [1] Botón de Editar Abajo */
+.btn-edit-product {
+    background: #E0E7FF; /* Fondo suave para EDITAR */
+    color: #4F46E5; /* Índigo para el texto */
+    border: none;
+    padding: 6px;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 5px;
+    font-size: 0.9rem;
+    display: flex; /* Para centrar el icono y texto */
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
 .btn-add-to-cart {
-    background: #E5E7EB; color: var(--text); border: none; padding: 8px;
-    width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer;
+    background: #E5E7EB; 
+    color: var(--text); 
+    border: none; 
+    padding: 8px;
+    width: 100%; 
+    border-radius: 8px; 
+    font-weight: 600; 
+    cursor: pointer;
+    margin-top: 5px; /* Separación del botón de editar */
 }
 
 /* --- MODALES Y FORMULARIOS --- */
@@ -181,6 +213,47 @@ h1 { font-size: 1.4rem; font-weight: 800; }
 .btn-secondary { background: #E5E7EB; border: none; padding: 10px 15px; border-radius: 12px; font-weight: 600; cursor: pointer; }
 .empty-state { text-align: center; padding: 40px; color: #6B7280; display: none; }
 
+
+/* [2] ESTILOS DEL ESCÁNER MEJORADOS */
+.scanner-card {
+    background: var(--text) !important; 
+    padding: 0 !important;
+    border-radius: 16px !important;
+}
+.scanner-header {
+    background: var(--primary);
+    color: var(--white);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 16px 16px 0 0;
+}
+.scanner-close-btn {
+    background: rgba(255, 255, 255, 0.3);
+    color: var(--white);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+}
+#reader {
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#reader > div {
+    border: 3px solid var(--primary) !important;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 111, 0, 0.7);
+    overflow: hidden; 
+}
+
+
 /* --- ESTILOS DE CARRITO/DEUDA --- */
 .cart-summary { margin-top: 20px; padding-top: 15px; border-top: 2px solid #F3F4F6; }
 .cart-total-row { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; font-size: 1.1rem; }
@@ -217,13 +290,31 @@ h1 { font-size: 1.4rem; font-weight: 800; }
     cursor: pointer; font-weight: bold;
 }
 
-/* Modal de Lista de Productos para Deuda */
+/* [3] Modal de Lista de Productos para Deuda - Mini Imágenes */
 .debt-product-list .product-list-item {
     display: flex; justify-content: space-between; align-items: center; padding: 10px 0;
     border-bottom: 1px solid #F3F4F6;
 }
 .debt-product-list .product-list-item:last-child { border-bottom: none; }
-.debt-product-list .product-info { font-weight: 600; }
+.debt-product-list .product-info-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1;
+}
+.debt-item-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: #eee;
+    flex-shrink: 0;
+}
+.debt-product-list .product-info { 
+    font-weight: 600; 
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
 
 
 /* --- TOAST NOTIFICATIONS (Mini Anuncio) --- */
