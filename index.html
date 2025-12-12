@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Catálogo Multi-Moneda</title>
+    
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <h1 id="mainTitle">Inventario</h1>
+            <div class="rate-control">
+                <label>Tasa Bs:</label>
+                <input type="number" id="exchangeRate" step="0.01" value="40.00" onchange="updateRate(this.value)">
+            </div>
+        </div>
+    </header>
+
+    <div class="nav-container">
+        <button id="navInventory" class="nav-btn active" onclick="showSection('inventory')">📦 Inventario</button>
+        <button id="navDebts" class="nav-btn" onclick="showSection('debts')">💰 Deudas</button>
+    </div>
+    
+    <div class="search-container" id="inventorySearch">
+        <span class="material-icons">search</span>
+        <input type="text" id="searchInput" placeholder="Buscar producto...">
+        <button class="btn-scan-mini" onclick="startScanner('search')"><span class="material-icons">qr_code_scanner</span></button>
+    </div>
+
+    <div id="inventorySection" class="content-section active-section">
+        <div id="productList" class="grid"></div>
+        
+        <div id="emptyState" class="empty-state">
+            <p>No hay productos aún.</p>
+        </div>
+
+        <button class="fab fab-cart" onclick="openCartModal()"><span class="material-icons">shopping_cart</span></button>
+        <button class="fab" onclick="openProductModal()"><span class="material-icons">add</span></button>
+    </div>
+
+    <div id="debtsSection" class="content-section">
+        <div id="debtorsList" class="debtors-list">
+            </div>
+
+        <div id="emptyDebts" class="empty-state">
+            <p>No hay deudas pendientes.</p>
+        </div>
+
+        <button class="fab" style="right: 20px;" onclick="openModal('debtorModal')"><span class="material-icons">person_add</span></button>
+    </div>
+
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-card">
+            <h2 class="modal-header" id="productModalTitle">Nuevo Producto</h2>
+            
+            <form onsubmit="saveProduct(event)">
+                <input type="hidden" id="prodId" value=""> <div class="form-group">
+                    <label class="form-label">Código de Barras</label>
+                    <div class="input-row">
+                        <input type="text" id="prodCode" class="form-input" placeholder="Escanear o escribir...">
+                        <button type="button" class="btn-secondary" onclick="startScanner('input')"><span class="material-icons">photo_camera</span></button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" id="prodName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Precio en Dólares ($)</label>
+                    <input type="number" id="prodPrice" step="0.01" class="form-input" required placeholder="0.00" oninput="calculateBsPrice()">
+                    <small class="price-info">Precio en Bs: <span id="displayBsPrice" style="font-weight: bold;">0.00</span></small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Foto</label>
+                    <div class="image-upload-container">
+                        <input type="file" id="prodImgFile" accept="image/*" onchange="handleImage(this)">
+                        <img id="previewImg" class="preview-img">
+                        <input type="hidden" id="prodImgBase64">
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button type="button" onclick="closeModal('productModal'); resetProductForm();" class="btn-secondary" style="flex:1">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="flex:1">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="cartModal">
+        <div class="modal-card">
+            <h2 class="modal-header">🛒 Carrito de Compras</h2>
+            <div id="cartItems"></div>
+            <div class="cart-summary">
+                <div class="cart-total-row"><span>Total USD:</span><span id="cartTotalUSD"></span></div>
+                <div class="cart-total-row">
+                    <span class="total-bs-final">TOTAL BS:</span>
+                    <span id="cartTotalBS" class="total-bs-final"></span>
+                </div>
+            </div>
+            <div class="button-row" style="margin-top: 15px;">
+                <button type="button" onclick="openConfirmationModal('Vaciar Carrito', '¿Estás seguro de vaciar el carrito?', clearCartConfirmed)" class="btn-secondary" style="flex:1">Vaciar Carrito</button>
+                <button type="button" onclick="closeModal('cartModal')" class="btn-primary" style="flex:1">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="scannerModal">
+        <div class="modal-card scanner-card">
+            <div class="scanner-header">
+                <span id="scanTitle">Escaneando...</span>
+                <button onclick="closeModal('scannerModal'); stopScanner();" class="scanner-close-btn">X</button>
+            </div>
+            <div id="httpsError" class="scanner-error-msg">
+                ⚠️ **Error de Permisos:** El navegador bloqueó la cámara. **Usa un enlace HTTPS.**
+            </div>
+            <div id="reader" style="width: 100%;"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="debtorModal">
+        <div class="modal-card">
+            <h2 class="modal-header">👤 Nuevo Deudor</h2>
+            <form onsubmit="saveDebtor(event)">
+                <div class="form-group">
+                    <label class="form-label">Nombre del Deudor</label>
+                    <input type="text" id="debtorName" class="form-input" required placeholder="Ej: Juan Pérez">
+                </div>
+                <div class="button-row">
+                    <button type="button" onclick="closeModal('debtorModal')" class="btn-secondary" style="flex:1">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="flex:1">Guardar Deudor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="debtItemsModal">
+        <div class="modal-card">
+            <h2 class="modal-header">➕ Agregar Ítems a Deuda: <span id="currentDebtorName"></span></h2>
+            <div id="debtItemsContent" class="debt-product-list">
+                </div>
+            <div class="button-row" style="margin-top: 15px;">
+                <button type="button" onclick="closeModal('debtItemsModal')" class="btn-primary">Hecho</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="confirmationModal">
+        <div class="modal-card">
+            <h2 class="modal-header" id="confirmTitle">Confirmar Acción</h2>
+            <p id="confirmMessage" style="margin-bottom: 20px;">¿Está seguro de proceder?</p>
+            <div class="button-row">
+                <button type="button" onclick="closeModal('confirmationModal')" class="btn-secondary" style="flex:1">Cancelar</button>
+                <button type="button" id="confirmActionBtn" class="btn-primary" style="flex:1; background-color: #EF4444;">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
